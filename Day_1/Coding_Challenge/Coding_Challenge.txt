@@ -1,0 +1,15 @@
+public class LongestStrin {
+    public static void main(String[] args) {
+        String[] arr = {"Dog", "Lion", "Elephant", "Cat", "Horse"};
+
+        int maxLen = 0;
+
+        for (String str : arr) {
+            if (str.length() > maxLength) {
+                maxLen = str.length();
+            }
+        }
+
+        System.out.println("Length of longest string is: " + maxLength);
+    }
+}

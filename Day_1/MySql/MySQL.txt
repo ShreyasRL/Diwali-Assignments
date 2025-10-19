@@ -1,0 +1,78 @@
+MySQL :-
+
+1.
+->  SELECT emp_id, emp_name, dept_id, salary FROM (SELECT emp_id, emp_name, dept_id, salary, DENSE_RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rank FROM employees) AS ranked WHERE rank <= 5;
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+2.
+->DELIMITER $$
+
+CREATE FUNCTION getWorkingDays(joining_date DATE)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE total_days INT DEFAULT 0;
+    DECLARE working_days INT DEFAULT 0;
+    DECLARE d DATE;
+
+    SET total_days = DATEDIFF(CURDATE(), joining_date);
+    SET d = joining_date;
+
+    WHILE total_days > 0 DO
+        IF DAYOFWEEK(d) NOT IN (1, 7) THEN  
+            SET working_days = working_days + 1;
+        END IF;
+        SET d = DATE_ADD(d, INTERVAL 1 DAY);
+        SET total_days = total_days - 1;
+    END WHILE;
+
+    RETURN working_days;
+END $$
+
+DELIMITER ;
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+3.
+->DELIMITER $$
+
+CREATE PROCEDURE updateSalaryByWorkingDays(IN empId INT)
+BEGIN
+    DECLARE joiningDate DATE;
+    DECLARE currentSalary DECIMAL(10,2);
+    DECLARE workDays INT;
+
+    -- Get employee data
+    SELECT joining_date, salary 
+    INTO joiningDate, currentSalary
+    FROM employees
+    WHERE emp_id = empId;
+
+    -- Calculate working days
+    SET workDays = getWorkingDays(joiningDate);
+
+    -- Apply differential salary hike
+    IF workDays > 250 THEN
+        SET currentSalary = currentSalary * 1.20;
+    ELSEIF workDays BETWEEN 200 AND 250 THEN
+        SET currentSalary = currentSalary * 1.10;
+    ELSEIF workDays BETWEEN 150 AND 199 THEN
+        SET currentSalary = currentSalary * 1.05;
+    END IF;
+
+    -- Update salary in the table
+    UPDATE employees
+    SET salary = currentSalary
+    WHERE emp_id = empId;
+END $$
+
+DELIMITER ;
+
+
+To Call Procedure:-
+call updateSalaryByWorkingDays(101);
+
+
+To check Salary Update:-
+Select * from employees
