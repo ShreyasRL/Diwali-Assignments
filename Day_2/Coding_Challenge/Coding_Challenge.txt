@@ -1,0 +1,23 @@
+public class ReverseInteger {
+    public static int reverseNumber(int n) {
+        int reversed = 0;
+        while (n != 0) {
+            int digit = n % 10;  
+            n /= 10;                         
+            
+            if (reversed > Integer.MAX_VALUE / 10 || reversed < Integer.MIN_VALUE / 10) {
+                return 0;  
+            }
+            
+            reversed = reversed * 10 + digit; 
+        }
+        return reversed;
+    }
+
+    public static void main(String[] args) {
+        int n = 3600;
+        int reversed = reverseNumber(n);
+        System.out.println("Original number: " + n);
+        System.out.println("Reversed number: " + reversed);
+    }
+}
